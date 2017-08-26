@@ -45,63 +45,77 @@ class TeamHandler(ModelHandler):
 class PassageHandler(ModelHandler):
     model = Passage
     fields = ("team_nb", "category_name", "path_name", "stage_name",
-            "timestamp", "uuid", "station_name", "lap_nb", "nb_laps",
+            "timestamp", "uuid", "station_name", "passage_nb", "nb_passages",
             "deleted", "duplicate_uuid", "errors", "team_errors")
+
 
     @classmethod
     def duplicate_uuid(self, p):
         return p.duplicate and p.duplicate.uuid
 
     @classmethod
+    def nb_passages(self, p):
+        if p.duplicate:
+            p = p.duplicate
+        stage = p.stage or p.team.path.first_stage
+        if stage:
+            return stage.nb_passages
+        return 0
+
+    @classmethod
+    def passage_nb(self, p):
+        if p.duplicate:
+            p = p.duplicate
+        return p.nb
+
+    @classmethod
     def team_nb(self, p):
+        if p.duplicate:
+            p = p.duplicate
         return p.team.nb
 
     @classmethod
     def category_name(self, p):
+        if p.duplicate:
+            p = p.duplicate
         return p.team.category.name
 
     @classmethod
     def path_name(self, p):
+        if p.duplicate:
+            p = p.duplicate
         return p.team.path.name
 
     @classmethod
     def stage_name(self, p):
+        if p.duplicate:
+            p = p.duplicate
         if p.stage is None:
             return u"Départ"
         return p.stage.lap_type.name
 
     @classmethod
     def timestamp(self, p):
+        if p.duplicate:
+            p = p.duplicate
         return time.mktime(p.time.timetuple())
 
     @classmethod
     def station_name(self, p):
+        if p.duplicate:
+            p = p.duplicate
         return p.station.name
 
     @classmethod
-    def lap_nb(self, p):
+    def errors(self, p):
         if p.duplicate:
             p = p.duplicate
-        try:
-            return p.get_lap_before().nb
-        except ObjectDoesNotExist:
-            if p.stage is None:
-                return None
-            return (p.team.passages.filter(time__lt=p.time, stage=p.stage).count() + (not bool(p.stage.before)))
-
-    @classmethod
-    def nb_laps(self, p):
-        stage = p.stage or p.team.path.first_stage
-        if stage:
-            return stage.nb_laps + bool(stage.after)
-        return 0
-
-    @classmethod
-    def errors(self, p):
         return [e.message for e in p.error_set.all()]
 
     @classmethod
     def team_errors(self, p):
+        if p.duplicate:
+            p = p.duplicate
         return [e.message for e in p.team.error_set.all()]
 
 class FunctionHandler(BaseHandler):

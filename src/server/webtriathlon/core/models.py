@@ -335,6 +335,17 @@ class Passage(models.Model):
         if self.duplicate:
             return self.duplicate.begins
 
+    @property
+    def nb(self):
+        if self.duplicate:
+            self = self.duplicate
+        try:
+            return self.get_lap_before().nb + bool(self.stage.before)
+        except Exception:
+            if self.stage is None:
+                return None
+            return self.team.passages.filter(time__lt=self.time, stage=self.stage).count() + 1
+
     def save(self, raw=False, *args, **kwargs):
         created = not self.pk
 

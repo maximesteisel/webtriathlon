@@ -95,7 +95,7 @@ class Main:
                 ("Heure", "time", str, True, True),
                 ("Étape", "stage", str, True, True),
                 ("Station", "station", str, True, True),
-                ("# Tour", "lap_nb", str, True, False),
+                ("#", "lap_nb", str, True, False),
                 ("Restants", "nb_lap_left", str, True, False),
                 ("Status", "status", str, True, False),
                 ("Message", "msg", str, True, False),
@@ -344,8 +344,8 @@ class Main:
         category = p["category_name"]
         path = p["path_name"]
         station = p["station_name"]
-        nb = p.get("lap_nb", None)
-        nb_laps = p.get("nb_laps", 0)
+        nb = p.get("passage_nb", None)
+        nb_laps = p.get("nb_passages", 0)
         deleted = p.get("deleted", None)
         duplicate = p.get("duplicate_uuid", None)
         errors = p.get("errors", [])
@@ -383,9 +383,6 @@ class Main:
             if stat != S_DELETED:
                 msg = stat
                 stat = S_DELETED
-        elif duplicate:
-            if msg is None:
-                msg = S_DUP
         elif errors or team_errors:
             if nb:
                 nb = "[%s]"%nb
