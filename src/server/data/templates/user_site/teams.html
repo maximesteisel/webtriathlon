@@ -17,7 +17,7 @@
              <td colspan="3"> <b> TERMINÉ </b> </td>
              {% else %}
              <td> {{t.state.current_stage.lap_type}} </td>
-             <td> {{t.state.last_passage.nb}} </td>
+             <td> {{t.state.passages_done}} </td>
               {% if t.state.passages_left == 1 %}
               <td> <b> DERNIER TOUR </b> </td>
               {% else %}
