@@ -2,8 +2,8 @@
         <tr>
             <th> Équipe </th>
             <th> Étape actuelle </th>
-            <th> Tour actuel </th>
-            <th> Tours en plus restants </th>
+            <th> # </th>
+            <th> Restants </th>
             <th> Dernier passage </th>
             <th> Note </th>
         </tr>
@@ -17,11 +17,11 @@
              <td colspan="3"> <b> TERMINÉ </b> </td>
              {% else %}
              <td> {{t.state.current_stage.lap_type}} </td>
-             <td> {{t.state.current_lap}} </td>
-              {% if not t.state.current_lap_left and not t.state.have_finished %}
+             <td> {{t.state.last_passage.nb}} </td>
+              {% if t.state.passages_left == 1 %}
               <td> <b> DERNIER TOUR </b> </td>
               {% else %}
-              <td> <b> {{t.state.current_lap_left}}</b> </td>
+              <td> <b> {{t.state.passages_left}}</b> </td>
               {% endif %}
              {% endif %}
             <td> {{t.state.last_passage.time|time:"H:i:s"}} </td>
