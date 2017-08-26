@@ -1,0 +1,226 @@
+Notes to self:
+
+DESIGN
+------
+
+    - We use gtk for the gui, django for the web framework and twisted for the web server
+
+    - The encoder and the server are designed to be distributed as two zip files: server.py and encoder.pyw
+    The pyw extension means that on windows, no shell windows will be created.
+    When python must run a folder or a zip file, it execute the __main__.py file inside the zip 
+    as an entry point, set sys.argv[0] to the file path of the zip file and 
+    add the zip file to sys.path, which means that modules and package inside the zip can be import'ed.
+
+    - This mean all code and data for the server is in the src/server folder and all code and data for the
+    encoder is in the src/encoder folder. Nothing is shared. 
+    To avoid dependancies, python-only dependancies are included in the server zip file 
+    in the external subdir. This external dir is added in front of sys.path
+    so even if django is installed on the host computer, the distributed copy is used.
+
+    - All custom code for the server is organized as a python 'package' named webtriathlon 
+    (localized at src/server/webtriathlon).
+    This package contain several sub-package (called apps by django) that each can define models 
+    (ie table in the db), urls mappings and views (ie functions that generate a html pages). 
+    These includes:
+        - webtriathlon.core: Contain the tables about the race: categories, teams, passages, ...
+            - webtriathlon.core.management.commands: implement the save2psave and csv2psave commands (see TESTING)
+        - webtriathlon.user_site: Contain views for the user-oriented part of the web site
+        - webtriathlon.admin_site: Contain views for the "admin tools"
+        - webtriathlon.dynamic: Contain temporary data for the computation of the rankings.
+        You can destroy them at any time without losing data. There is a tool in the admin
+        to recompute everything in this app. There is no views or urls in this app
+        It is where all serious computation is made:
+            - webtriathlon.dynamic.errors: find anomalies in the race (lap too fast, too much laps, ...)
+            - webtriathlon.dynamic.ranking: compute ranking
+            - webtriathlon.dynamic.path: some function to compute laps from passages, mainly
+            - webtriathlon.dynamic.async: functions to refresh the models from dynamic asynchronously using twisted
+ 
+        - webtriathlon.api: implement the web api used by the encoder, using piston
+    
+    There is also some important top-level modules:
+        - webtriathlon.misc: miscellanous function (conversion, list manipulation, ...)
+        - webtriathlon.settings: contain settings used by django, like the location of databases, ...
+        - webtriathlon.manage: a module that can be called to execute function, including:
+            - help: generate a list of all commands and can describe them
+            - runserver: a server that restart each time a source file is modified, usefull for testing
+            - reset app: destroy every data in the app (but does not modify the structure of the 
+            table if the models changed.
+            - save2psave: see TESTING
+            - csv2psave: see TESTING
+        Exemple of use: python manage.py runserver or python server.py csv2psave
+        -  webtriathlon.monkeypatch.py "monkey patch" some python functions like open() and listdir()
+        and some part of django so the rest of the program can find files in the zip files 
+        as if they were directly on the hard drive.  monkeypatch is imported by server.tac and
+        webtriathlon.manage, the two script that can be executed by __main__.py 
+    
+    - Some environement variables are set by __main__.py for the child server process:
+        - If the server is called as a zip file, WT_ZIP point to the zipfile. 
+        This is used in monkeypatch mainly
+        - WT_TEST is non-empty if the test database should be used
+        - WT_DATA_DIR point to the temp dir where the data files for the server 
+        (images, css, html templates,...) are extracted to avoid decompressing the zip each time
+        - PYTHONPATH is used by python to find modules. we add server/external so dependances are found by python.
+    
+    - The encoder can send a request to the server to do a number of things. It does it by sending a POST request
+    to /api/+execute with 2 parameters: function and kwargs. kwargs is a json encoded dictionnary containig keywords
+    arguments to pass to the function.
+    
+    
+    - If connection is broken or the function fails for another reason 
+    (ie, we try to add a passage to a non-existent team, then the passage is saved in a *.psave file.
+
+    - Each passage have a universally unique id (uuid) which is computed by uuid.uuid1() when the passage is created
+    (so generally in the encoder but if the passage is added via the admin site, it will be computed server-side) 
+    so there is no possibility to have two passages with the same id. Else, a passage could erase another passage
+    by accident. Other models have simple id, so it is recommended to do one save before the race and avoid
+    modifying anything except passages after that
+
+    - As two team in the same category can have sligtly different path, the ranking is not computed
+    only on the actual time a team made but on a corrected time. For each stage, the mean speed is multiplied
+    by the official theorical stage lengt which is the same for every team. The sum is the corrected time.
+    If a team have a sligthly longer path, his corrected time will be slower than his real time and vice-versa.
+    The corrected time can also allow teams that have made one lap more than it should to win anyway.
+
+API
+---
+
+    Encoders use a HTTP API to connect to the server and send passages.
+    The api allow to GET the data in the db, using the path /api/<model_name>
+    For example, to get a list of all the teams, you get the path /api/team/.
+    A specific team can be retreived via /api/team/<nb_of_team>.
+    The data is json-encoded.
+    To modify the db, you need to send a POST request to /api/+execute/
+    The post data must be a json-encoded dictionnary containing the keys 
+        - function: the name of the function in webtriathlon.api._functions
+        - kwargs: a dictionary corresponding to the arguments to be passed to function
+    The functions return a list of altered objects (json-encoded)
+
+    Example of a telnet session:
+    $ telnet localhost 8000
+
+    GET /api/team/ HTTP/1.1
+
+    HTTP/1.1 200 OK
+    Transfer-Encoding: chunked
+    Date: Tue, 09 Aug 2011 13:22:02 GMT
+    Content-Type: application/json; charset=utf-8
+    Vary: Authorization
+    Server: TwistedWeb/10.1.0
+    
+    14e
+    [
+        {
+            "category": {
+                "name": "Olympique"
+            }, 
+            "path": {
+                "name": "Olympique Étang"
+            }, 
+            "nb": 1, 
+            "subcategories": [
+                {
+                    "_state": "<django.db.models.base.ModelState object at 0xa544c4c>", 
+                    "id": 1, 
+                    "name": "Competition"
+                }
+            ], 
+            "members": []
+        },
+        {
+            "category": {
+                "name": "Olympique"
+            }, 
+            "path": {
+                "name": "Olympique Étang"
+            }, 
+            "nb": 2, 
+            "subcategories": [
+                {
+                    "_state": "<django.db.models.base.ModelState object at 0xa544c4c>", 
+                    "id": 1, 
+                    "name": "Competition"
+                }
+            ], 
+            "members": []
+        },
+    ]
+    0
+
+    GET /api/team/1/ HTTP/1.1
+
+    HTTP/1.1 200 OK
+    Transfer-Encoding: chunked
+    Date: Tue, 09 Aug 2011 13:24:02 GMT
+    Content-Type: application/json; charset=utf-8
+    Vary: Authorization
+    Server: TwistedWeb/10.1.0
+
+    14e
+    {
+        "category": {
+            "name": "Olympique"
+        }, 
+        "path": {
+            "name": "Olympique Étang"
+        }, 
+        "nb": 1, 
+        "subcategories": [
+            {
+                "_state": "<django.db.models.base.ModelState object at 0xa544c4c>", 
+                "id": 1, 
+                "name": "Competition"
+            }
+        ], 
+        "members": []
+    }
+    0
+
+    
+
+ 
+
+FILE FORMATS
+------------
+    
+    - psave files can be uploaded via the admin site or via the encoder interface. These files contain 1 request per line,
+    in the form of an json encoded dict with two keys: function and kwargs. The kwargs must not be doubly json encoded,
+    meaning if you decode the request, you get kwargs in the form of a python dictionnary, 
+    not in the form of a json-encoded dictionnary.
+
+    - There is another custom file format: .save files. These are zip archive containing on file per models
+    each file is a json encoded list where each element correspond to a row in the database. These file are
+    not compatible across version of the program
+    
+    - Procedure to convert an old save to a newer format:
+        - Start a clean server
+        - Import the old save selecting everithing except teams and passage
+        - Correct the data manually if there is problems during the import
+        - Convert the save to a psave with the save2psave command
+        - Import the psave file
+        - Correct manually
+        - Save
+
+
+TESTING
+-------
+
+    - You can run the server by calling "python src/server/" python execute folder the same way they execute
+    zip file. There is an option to start the devellopement server, which restart each time you change a
+    source file, which is very useful when coding.
+
+    - For testing, it is useful to reproduce a race and checking if the ranking is correct. To help with that,
+    two django command are provided (in the server starting menu, there is a option to execute a django command)
+        - csv2psave -f team infile.csv outfile.psave 
+            This command will read infile.csv which must be in the form "category, team" and add the teams
+        - csv2psave -f passage infile.csv outfile.psave
+            This command will read infile.csv which must be in the form "team, nb_seconds_from_now, station" 
+            and add the passages. Note that time is relative and exprimed in seconds. You can change the
+            reference time by using "-t TIME". TIME must be an unix timestamp (nb of seconds since January first 1970)
+        - save2psave infile.save outfile.psave
+            This command will read the save file and extract a list of teams and passages in the psave format. 
+            Since the save format can vary between version, it could pose compatibility problem but it 
+            should work most of the time.
+
+    The resulting psave file can then be uploaded via the admin site. You still need to manually set up the race
+    (ie, creating categories, paths, stages, etc...) but you don't need to add each and every passages.
+            

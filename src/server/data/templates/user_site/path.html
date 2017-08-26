@@ -1,0 +1,16 @@
+<ul>
+    {% for s in path %}
+    <li> {{s}} ({{s.length}}m):
+        <ul>
+            {% if s.before %} 
+            <li> 1 jonction de {{s.before.length}}m en {{s.lap_type}} du poste {{s.before.station}} au poste {{s.main_station}} </li>
+            {% endif %}
+            <li> {{s.nb_laps}} tours de {{s.lap_length}}m en {{s.lap_type}}, encodés au poste {{s.main_station}}</li>
+            {% if s.after %} 
+            <li> Jonction de {{s.after.length}}m en {{s.lap_type}} du poste {{s.main_station}} au poste {{s.after.station}} </li>
+            {% endif %}
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
+

@@ -1,0 +1,15 @@
+{% extends "save/base.html" %}
+
+{% block content %}
+{% if dbversion %}
+<p> Version de la base de donnée: {{dbversion}}</p>
+{% endif %}
+<p>
+<form enctype="multipart/form-data" method="post" action="{{ action }}">
+    <table>
+    {{form}}
+    </table>
+    <input type="submit" value="Envoyer" />
+</form>
+</p>
+{% endblock %}

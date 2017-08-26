@@ -1,0 +1,38 @@
+{% extends "admin_tools/base.html" %}
+
+{% block content %}
+<h2> Informations sur la course </h2>
+<ul>
+    <li> <a href="/admin_tools/errors"> Erreurs à corriger </a> </li> 
+    <li> <a href="/admin_tools/modified_passages"> Passages manuellement modifiés </a> </li>
+    <li> <a href="/admin_tools/deleted_passages"> Passages supprimés </a> </li>
+    <li> <a href="/admin_tools/disqualified_teams"> Équipes disqualifiées </a> </li>
+    <li> <a href="/admin_tools/jobs"> File d'attente des mises à jour </a> </li>
+</ul>
+
+<h2> Documents à imprimer </h2>
+<ul>
+    <li> <a href="/admin_tools/ranking/"> Classement final </a> </li>
+    <li> <a href="/admin_tools/teams/"> Feuilles de courses </a> </li>
+    <li> <a href="/admin_tools/stats/"> Statistiques </a> </li>
+</ul>
+
+<h2> Sauvegarde </h2>
+<ul>
+    <li> <a href="/admin_tools/save/"> Sauvegarder la base de données </a> </li>
+    <li> <a href="/admin_tools/open/"> Charger une sauvegarde </a> </li>
+    <li> <a href="/admin_tools/open_passages/"> Charger une liste de passages </a> </li>
+</ul>
+
+<h2> Actions </h2>
+<ul>
+    <li> <a href="/admin_tools/add_team/"> Ajouter une équipe </a> </li>
+    <li> <a href="/admin/core/passage/add/"> Ajouter un passage à une équipe </a> </li>
+    <li> <a href="/admin_tools/add_passages/"> Ajouter un passage à une catégorie </a> </li>
+    <li> <a href="/admin_tools/refresh_all/"> Tout recalculer </a> </li>
+    <li> <a href="/admin_tools/refresh_errors/"> Rafraichir les erreurs détectées </a> </li>
+    <li> <a href="/admin_tools/align_all/"> Aligner les passages de toutes les équipes </a> </li>
+    <li> <a href="/admin_tools/delete_passages/"> Supprimer tout les passages </a> </li>
+    <li> <a href="/admin_tools/delete_all/"> Tout supprimer (mettre à blanc) </a> </li>
+</ul>
+{% endblock %}

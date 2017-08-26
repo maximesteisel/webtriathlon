@@ -1,0 +1,77 @@
+{% extends "user_site/base_detail.html" %}
+{% load humanize %}
+
+{% block detail %}
+
+<h2>
+Catégorie {{category.name}} 
+
+{% for sc in subcats %} {{sc}} {% endfor %}
+
+{% if user.is_authenticated %}
+<a href="/admin/core/category/{{category.id}}/" class="action"> (éditer) </a>
+{% endif %}
+</h2>
+
+<h3 id="ranking"> Classement provisoire <a href="refresh" class="action"> (actualiser) </a> </h3>
+<table>
+    <thead>
+        <tr class="{% cycle "dark" "light" as colors %}">
+            <th>Equipe</th>
+            <th>Membres</th>
+            <th>Temps total</th>
+            <th>Étape actuelle</th>
+            <th>Dernier passage </th>
+            <th>Note</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in ranking %}
+        <tr class="{% cycle colors %} {%if t.state.has_error %} warning {% endif %}">
+            <td><a href="{{t.get_absolute_url}}">{{t.nb}}</a></td>
+            <td> {{t.members.all|join:", "}}</td>
+
+            {% if t.passages.all.count %}
+                <td>  {{t.state.total_ftime}} </td>
+                {% if t.disqualified %}
+                <td> disqualifié </td>
+                {% else %}
+                    {% if t.state.have_finished %}
+                    <td> terminé </td> 
+                    {% else %}
+                    <td> {{t.state.current_stage.lap_type}} </td>
+                    {% endif %} {# finished #}
+                {% endif %} {# disqualified #}
+                <td> {{t.state.last_passage.time|time:"H:i:s"}} </td>
+            {% else %} {# not passages.count #}
+            <td> </td>
+            <td> </td>
+            <td> </td>
+            {% endif %}
+            <td> {{t.state.error_msg}} </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3> Distances officielles </h3>
+<ul>
+    {% for s in category.stages %}
+    <li> {{s.length}}m en {{s.lap_type}} </li>
+    {% endfor %}
+</ul>
+
+<ul class="no-print">
+    <li> <a href="/category/"> Revenir à la liste des catégories </a> </li>
+    <li> <a href="/feedback/"> Signaler une erreur </a> </li>
+    {% if user.is_authenticated %}
+    <li> 
+        <a href="/admin_tools/ranking/#category-{{category.name}}">Voir le classement final</a> 
+    </li>
+    <li> 
+        <a href="/admin_tools/teams/#category-{{category.name}}">Voir les feuilles de courses</a>
+    </li>
+    {% endif %}
+</ul>
+
+{% endblock %}

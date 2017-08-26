@@ -1,0 +1,41 @@
+{% extends "admin_tools/base.html" %}
+
+{% block extrahead %}
+<meta http-equiv="REFRESH" content="1"/>
+{% endblock %}
+{% block content %}
+<h3> File d'attente </h3>
+<p> Longeur de la file d'attente: {{queue_len}} </p>
+
+{% if global_queue %}
+<h3> File d'attente: </h3>
+<table>
+    <tr>
+        <th> Objet </th>
+        <th> Priorité </th>
+    </tr>
+    {% for j in global_queue %}
+    <tr>
+        <td> {{j}} </td>
+        <td> {{j.priority}} </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+{% if last_updates %}
+<h3> Dernières mises à jour: </h3>
+<table>
+    <tr>
+        <th> Objet </th>
+        <th> Mis à jour à </th>
+    </tr>
+    {% for j in last_updates %}
+    <tr>
+        <td> {{j}} </td>
+        <td> {{j.updated|time:"H:i:s"}} </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "user_site/base_detail.html" %}
+
+{% block detail %}
+<h2> Équipe {{team.nb}}
+{% if user.is_authenticated %}<a href="/admin/core/team/{{team.nb}}/" class="action"> (éditer) </a> {%endif%}
+</h2>
+<form method="get" action="{{ team.category.get_absolute_url }}">
+    <ul>
+        <li> Catégorie: <a href="{{ team.category.get_absolute_url }}"> {{team.category }} </a> 
+            {% for sc in team.subcategories.all %} 
+            <a href="{{team.category.get_absolute_url}}?subcat={{sc}}">{{sc}}</a>
+            <input type="hidden" name="subcat" value="{{sc}}"/>
+            {% endfor %}
+            {% if team.subcategories.all %}
+            <input type="submit" value="Filtrer le classement"/>
+            {% endif %}
+        </li>
+        {% if team.members.all %}
+        <li> Membres:
+            <ul>
+                {% for m in team.members.all %}
+                <li> {{m}} </li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endif %}
+        <li> Parcours: {{team.path}}
+        {% with team.path as path %}
+        {% include "user_site/path.html" %}
+        {% endwith %}
+        </li>
+        <li> Rang: 
+        {% if team.disqualified %}
+        disqualifié
+        {% else %}
+        {{team.state.rank}} / {{team.category.team_set.all.count}}
+        {% endif %} 
+        </li>
+        {% if not team.state.have_finished %}
+        <li> Étape actuelle: {{team.state.current_stage}} </li>
+        <li> Tour restants à faire: {{team.state.lap_left}} </li>
+        {% endif %}
+    </ul>
+</form>
+<h3>Tours 
+    {% if user.is_authenticated %}
+    <a href="refresh" class="action">(recalculer)</a> <a href="align" class="action">(aligner)</a>
+    {% endif %}
+</h3>
+{% include "user_site/laps.html" %}
+<ul class="no-print">
+    <li> <a href="{{team.category.get_absolute_url}}"> Retourner au classement </a> </li>
+    <li> <a href="/feedback/"> Signaler une erreur </a> </li>
+    {% if user.is_authenticated %}
+    <li> <a href="/admin_tools/ranking/#team-{{team.nb}}"> Voir sur le classement final </a> </li>
+    <li> <a href="/admin_tools/teams/#team-{{team.nb}}"> Voir la feuille de course </a> </li>
+    {% endif %}
+</ul>
+{% endblock %}
+

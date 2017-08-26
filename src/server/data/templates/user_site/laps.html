@@ -1,0 +1,40 @@
+<table>
+    <thead>
+        <tr class="{% cycle "dark" "light" as colors %}">
+            <th> Étape </th>
+            <th> Numéro </th>
+            <th> Début </th>
+            <th> Fin </th>
+            <th> Durée </th>
+            <th> Longueur (m) </th>
+            <th> Vitesse </th>
+            <th class="no-print"> Note </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for l in team.lap_set.all %}
+        <tr
+            {% if l.has_error %} 
+            class="{% cycle colors %} warning" 
+            {% else %}
+            class="{% cycle colors %}" 
+            {% endif %}
+            id="lap-{{l.id}}">
+            <td> {{l.stage.lap_type}} </td>
+            <td> {{l.nb}} </td>
+            <td> {{l.begin.time|time:"H:i:s"}} </td>
+            <td> {{l.end.time|time:"H:i:s"}} </td>
+            <td> {{l.ftime}}</td>
+            <td> {{l.length}} </td>
+            <td> {{l.fspeed}}</td>
+            {% if l.has_error %}
+            <td class="no-print"> {{l.error_msg}} </td>
+            {% else %}
+            <td class="no-print"> </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+

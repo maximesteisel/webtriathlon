@@ -1,0 +1,13 @@
+{% extends "admin_tools/base.html" %}
+
+{% block content %}
+<ul>
+    {% if not teams %}
+    <li> Pas d'équipes corresondantes </li>
+    {% endif %}
+    {% for t in teams %}
+    <li> {{t}} </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

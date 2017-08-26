@@ -1,0 +1,9 @@
+{% extends "admin_tools/base.html" %}
+
+{% block content %}
+<ul>
+    {% for p in passages %}
+    <li> {{p}} </li>
+    {% endfor %}
+</ul>
+{% endblock %}

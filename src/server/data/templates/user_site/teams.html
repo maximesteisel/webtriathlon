@@ -1,0 +1,39 @@
+    <table>
+        <tr>
+            <th> Équipe </th>
+            <th> Étape actuelle </th>
+            <th> Tour actuel </th>
+            <th> Tours en plus restants </th>
+            <th> Dernier passage </th>
+            <th> Note </th>
+        </tr>
+        {% for t in teams %}
+        <tr class="{%cycle "dark" "light" %} {% if t.state.has_error %}warning{%endif%}">
+            <td> <b> <a href={{t.get_absolute_url}}>{{t.nb}}</a> </b> </td>
+            {% if t.state.current_stage.lap_type %}
+             {% if t.disqualified %}
+             <td colspan="3"> <b> DISQUALIFIÉ </b> </td>
+             {% elif t.state.have_finished %}
+             <td colspan="3"> <b> TERMINÉ </b> </td>
+             {% else %}
+             <td> {{t.state.current_stage.lap_type}} </td>
+             <td> {{t.state.current_lap}} </td>
+              {% if not t.state.current_lap_left and not t.state.have_finished %}
+              <td> <b> DERNIER TOUR </b> </td>
+              {% else %}
+              <td> <b> {{t.state.current_lap_left}}</b> </td>
+              {% endif %}
+             {% endif %}
+            <td> {{t.state.last_passage.time|time:"H:i:s"}} </td>
+            {% else %}
+            <td> </td>
+            <td> </td>
+            <td> </td>
+            <td> </td>
+            {% endif %}
+            <td> {{t.state.error_msg}} </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+

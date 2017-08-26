@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} {% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="/admin/">Administration {%if debug%} (serveur de test) {%endif%}</a></h1>
+{% endblock %}
+
+{% block nav-global %}
+<a href="/">Site public</a> |
+<a href="/admin/">Administration</a> |
+<a href="/admin_tools/"> Outils </a>
+{% endblock %}

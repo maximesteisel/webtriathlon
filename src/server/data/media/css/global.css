@@ -1,0 +1,100 @@
+body{
+    font-family: "Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+}
+
+#content h1{
+    font-family: "MS Trebuchet", "sans serif";
+}
+
+h1.title{
+    text-align: center;
+}
+
+h2 {
+    font-size: 0.9em;
+    font-family: arial, "sans serif";
+    color: blue;
+    margin: 0.3em;
+}
+
+h3 {
+    padding-left: 2%;
+    padding-bottom: 0.2em;
+}
+
+h4 {
+    padding-left: 3%;
+    padding-bottom: 0.2em;
+}
+
+a, a:link, a:visited { text-decoration: none; color: #3366FF} /* light blue */
+a:hover { text-decoration: underline;}
+
+a.action, a.action:link, a.action:visited {
+    font-size: 0.6em;
+    font-style: italic;
+    color: #990033; /* red */
+}
+
+table {
+    border: medium solid blue ;
+    border-collapse: collapse;
+    margin: 0.2em auto 0.2em auto;
+    min-width: 70%;
+    max-width: 95%;
+}
+
+form table {
+    min-width:0;
+    margin: 1em;
+    border: none;
+}
+
+form td, form th {
+    border: none;
+}
+
+td, th {
+    font-size: 0.6em;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+    text-align: center;
+    border: 1px solid #6495ed; /* light blue */
+}
+
+th {
+    color: #4B0082; /* indigo */
+}
+
+
+tr.dark {
+    background: #F0F0F0; /* dark grey */
+}
+
+tr.light {
+    background: #FAFAFA; /* light grey */
+}
+
+.warning {
+    color: orange;
+}
+
+.error {
+    color: red;
+}
+
+tr.warning {
+    color: black;
+    background: #FFE4C4; /* light brown */
+}
+
+tr.rank-new-team td{
+    border-top: 3px solid blue;
+    border-bottom: 2px solid #6495ed; /* light blue */
+    font-size: 0.8em;
+}
+
+#clock {
+    font: 150% bold;
+    text-align: center;
+}

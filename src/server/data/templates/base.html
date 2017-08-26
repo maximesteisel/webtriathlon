@@ -1,0 +1,40 @@
+{% extends "html_base.html" %}
+
+{% block head %}
+<title> Webtriathlon </title>
+<link rel="stylesheet" type="text/css" href="/media/css/global.css" media="all"/>
+<link rel="stylesheet" type="text/css" href="/media/css/layout.css" media="all"/>
+<link rel="stylesheet" type="text/css" href="/media/css/print.css" media="print"/>
+<link rel="shortcut icon" href="/media/favicon.png"/>
+{% block extrahead %} {% endblock %}
+{% endblock %}
+
+{% block body %}
+        <div id="header">
+            {% block header %}
+            <div class="left" id="quicklinks"> 
+                <a href="/admin_tools/add_team/"> S'inscrire </a> |
+                <a href="/status/"> Où en êtes-vous </a> |
+                <a href="/category/"> Classements provisoires </a> |
+                {#<a href="/wiki/"> Informations générales </a> | #}
+            </div>
+            <div class="right" id="title"> 
+                <a href="/"> Webtriathlon </a>
+            </div>
+            <div class="clear-both"></div>
+            {% endblock %}
+        </div>
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
+        <div id="footer">
+            {% block footer %} 
+            <div class="left" id="timestamp"> Mis à jour {% now "r" %} </div>
+            <div class="right" id="admin">
+                <a href="/admin/"> Administration </a>
+            </div>
+            <div class="clear-both"></div>
+            {% endblock %} 
+        </div>
+{% endblock %}
+

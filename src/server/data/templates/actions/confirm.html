@@ -1,0 +1,10 @@
+{% extends "save/base.html" %}
+
+{% block content %}
+<form method="post" action="">
+    <p> En êtes-vous sur?</p>
+    <input type="hidden" name="confirm" value="true"/>
+    <input type="submit" value="Confirmer"/>
+    <input type="submit" name="confirm" value="Annuler"/>
+</form>
+{% endblock %}

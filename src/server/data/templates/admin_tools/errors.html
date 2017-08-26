@@ -1,0 +1,21 @@
+{% extends "admin_tools/base.html" %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="/media/css/errors.css" />
+<meta http-equiv="refresh" content="60"/>
+{% endblock %}
+{% block content %}
+{% if errors %}
+<ul>
+    {% for e in errors %}
+    <li class="{{e.severity}}"> <a href={{e.target.get_absolute_url}}> {{e.target}}</a> : {{e.message}} (
+    {% if e.fixable %} <a href="/{{e.get_url}}" target="error_target">{{e.get_fix_description}}</a>,  {% endif %}
+    <a href="/{{e.get_ignore_url}}" target="error_target">Supprimer cette erreur</a> )
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p> Pas d'erreurs détectées! </p>
+{% endif %}
+
+{% endblock %}

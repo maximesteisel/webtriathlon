@@ -1,0 +1,31 @@
+{% extends "base.html"%}
+{% load humanize %}
+
+{% block content %}
+{% for c, teams in categories %}
+<div class="break-after">
+<h2 id="category-{{c.name}}"> {{c}} </h2>
+{% if not teams %}
+<p> Aucune équipe n'est encore arrivée </p>
+{% endif %}
+{% for rank, team in teams %}
+<div class="no-break">
+{% if team.disqualified %}
+{% ifchanged team.disqualified %}
+<h3> Équipes disqualifiées </h3>
+{% endifchanged %}
+<h4 id="team-{{team.nb}}"> <a href="{{team.get_absolute_url}}">{{team}}</a> 
+    {% if team.members.all.count %} ({{team.members.all|join:", "}}) {% endif %}
+</h4>
+{% else %}
+<h4 id="team-{{team.nb}}"> {{rank|safe|ordinal}}: <a href="{{team.get_absolute_url}}">{{team}}</a> 
+    {% if team.members.all.count %} ({{team.members.all|join:", "}}) {% endif %}
+</h4>
+{% endif %} {# disqualified #}
+{% include "user_site/laps.html" %}
+</div>
+{% endfor %}
+</div>
+{% endfor %}
+
+{%endblock%}

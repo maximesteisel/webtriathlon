@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% for cat, stats in stats %}
+{% if cat %}
+<h2> {{cat}} </h1>
+{% else %}
+<h2> Toutes catégories </h2>
+{% endif %}
+
+<table>
+    <tr>
+        <th> </th>
+        <th> Équipe </th>
+        <th> Tour n° </th>
+        <th> Vitesse </th>
+    </tr>
+{% for lt, stats in stats %}
+    <tr> 
+        <td> Meilleur tour de {{lt}} </td> 
+        {%with stats.best_lap as l%}
+        <td> {{l.team}} </td>
+        <td> <a href={{l.get_absolute_url}} > {{l.nb}} </a> </td>
+        <td> {{l.fspeed}} </td>
+        {% endwith %}
+    </tr>
+    <tr>
+	<td> Tour Median de {{lt}} </td>
+        {%with stats.median_lap as l%}
+        <td> {{l.team}} </td>
+        <td> <a href={{l.get_absolute_url}} > {{l.nb}} </a> </td>
+        <td> {{l.fspeed}} </td>
+        {% endwith %}
+	
+
+    <tr>
+        <td> Pire tour de {{lt}} </td>
+        {%with stats.worst_lap as l%}
+        <td> {{l.team}} </td>
+        <td> <a href={{l.get_absolute_url}} > {{l.nb}} </a> </td>
+        <td> {{l.fspeed}} </td>
+        {% endwith %}
+    </tr>
+{% endfor %}
+</table>
+{% endfor %} 
+
+{% endblock %}

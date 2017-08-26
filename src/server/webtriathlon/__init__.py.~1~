@@ -1,0 +1,33 @@
+import logging
+import threading
+from datetime import datetime
+
+from django.conf import settings
+from webtriathlon.misc import get_db_version, _Batch_mode
+
+MAX_CONN = 15
+CONN_LOCK = threading.BoundedSemaphore(MAX_CONN)
+LAST_UPDATE = datetime.now()
+MAX_CACHE_TIME = 20
+
+logging.basicConfig()
+LOG = logging.getLogger("webtriathlon")
+DEBUG=settings.DEBUG
+if settings.DEBUG:
+    LOG.setLevel(logging.DEBUG)
+else:
+    LOG.setLevel(logging.INFO)
+LOG.setLevel(logging.INFO)
+
+BATCH_MODE = _Batch_mode()
+
+def update_last_update(*args, **kwargs):
+    global LAST_UPDATE
+    LAST_UPDATE = datetime.now()
+
+def get_last_update(*args, **kwargs):
+    td = datetime.now() - LAST_UPDATE
+    if td.total_seconds() > MAX_CACHE_TIME:
+	update_last_update()
+    return LAST_UPDATE
+

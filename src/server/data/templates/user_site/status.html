@@ -1,0 +1,61 @@
+{% extends "user_site/base_detail.html" %}
+
+{% block bodyattr %} onload="clock()" {% endblock %}
+
+{% block content %}
+<script type="text/javascript">
+    var tick;
+    function clock() {
+        var d = new Date();
+        var h,m,s;
+        var time="";
+        h=d.getHours();
+        m=d.getMinutes();
+        s=d.getSeconds();
+        if(s<=9) s="0"+s;
+        if(m<=9) m="0"+m;
+        if(h<=9) h="0"+h;
+        time=h+":"+m+":"+s;
+        document.getElementById("clock").innerHTML=time;
+        tick=setTimeout("clock()", 1000);
+    }
+</script>
+<script type="text/javascript"> clock() </script>
+
+
+{% if announcements %}
+<div>
+<h2> Annonces </h2>
+<ul>
+    {% for ann in announcements %}
+    <li><b> {{ann.message}}</b></li>
+    {% endfor %}
+</ul>
+<div>
+{%endif%}
+
+<div>
+<p id="clock"> {% now "H:i:s" %} </p>
+</div>
+
+<div class="left">
+    <h2 id="waited"> Équipes attendues bientôt </h2>
+    {% with waited_teams as teams %}
+    {% include "user_site/teams.html" %}
+    {% endwith %}
+    <h2 id="last-seen"> Équipes vues récemment </h2>
+    {% with last_seen_teams as teams %}
+    {% include "user_site/teams.html" %}
+    {% endwith %}
+</div>
+<div class="right">
+    <h2> Toutes les Équipes</h2>
+    {% with all_teams as teams %}
+    {% include "user_site/teams.html" %}
+    {% endwith %}
+</div>
+
+<div> </div> 
+
+{% endblock %}
+

@@ -1,0 +1,51 @@
+html, body, #container, #content {
+    height: 99%; /* Avoid an empty page */
+    color: black;
+}
+
+#header, #footer {display: none}
+#content {
+    background: white;
+}
+#footer {display: none}
+h2, h3, h4 {text-align: center}
+a:link, a:visited {
+    color: black;
+}
+
+body {
+    font-size: 0.7em;
+}
+
+a.action{
+    display: none;
+}
+
+.no-print{
+    display: none;
+}
+
+table{
+    max-width: 18cm;
+    min-width: 13cm;
+    font-size: 0.8em;
+    page-break-inside: avoid;
+}
+
+.break-after{
+    page-break-after: always;
+}
+
+td, th{
+    padding-left: 0.7em;
+    padding-right: 0.7em;
+}
+
+div.no-break {
+    page-break-inside: avoid;
+}
+
+td.dark,td .light, td {
+	background: #FFF !important; //White
+}
+

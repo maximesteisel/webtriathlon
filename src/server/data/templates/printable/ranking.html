@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% for csc, teams in categories %}
+{% with csc.0 as c %}
+{% with csc.1 as sc %}
+{% with c.stage_set.all.count|add:1 as nb_stages %}
+{% ifchanged csc %}
+{% if sc %}
+<h2 id="category-{{c.name}}-{{sc.name}}"> {{ c.name }} {{sc.name}} </h2>
+{% else %}
+<h2 id="category-{{c.name}}"> {{ c.name }} </h2>
+{% endif %}
+<div class="no-break break-after">
+<table>
+    <thead>
+        <tr>
+            <th> Rang </th>
+            <th> Équipe </th>
+            <th> Membres </th>
+	    {% if not sc %}
+            <th> Sous-catégories </th>
+	    {% endif %}
+            <th> Parcours </th>
+            <th> Étape </th>
+            <th> Rang </th>
+            <th> Départ </th>
+            <th> Arrivée </th>
+            <th> Temps total </th>
+            <th> Correction </th>
+            <th> Temps corrigé </th>
+        </tr>
+    </thead>
+{% endifchanged %}
+{% for rank, team, laps, stages, nb_stages in teams %}
+    <tbody class="team">
+        {% if sc %}
+        <tr class="rank-new-team" id="team-{{team.nb}}-{{sc}}">
+        {% else %}
+        <tr class="rank-new-team" id="team-{{team.nb}}">
+        {%endif%}
+            <td rowspan="{{nb_stages}}"> <b>
+                {% if team.disqualified %}> D 
+                {% else %} {{ rank }}  
+                {% endif %}
+            </b> </td>
+            <td rowspan="{{nb_stages}}"> <a href="{{team.get_absolute_url}}"> <b> {{team.nb}} </b> </a></td>
+            <td rowspan="{{nb_stages}}"> <b> {{ team.members.all|join:", " }} </b> </td>
+	    {% if not sc %}
+            <td rowspan="{{nb_stages}}"> <b> {{ team.subcategories.all|join:", " }} </b> </td>
+	    {% endif %}
+            <td rowspan="{{nb_stages}}"> {{team.path}} </td>
+            <td> Général </td>
+
+            {% if team.disqualified %}
+            <td> <b> D </b> </td>
+            {% else %}
+            <td> <b> {{ rank }} </b> </td> 
+            {% endif %}
+
+            <td> {{ team.state.first_passage.time|time:"H:i:s" }} </td>
+            <td> {{ team.state.last_passage.time|time:"H:i:s" }} </td>
+            <td> <b> {{ team.state.total_ftime }} </b> </td>
+            <td> {{ team.state.ranking_fdelta }} </td>  
+            <td> {{ team.state.proj_ftime }} </td>
+        </tr>
+
+        {% for rank, stage, laps, begin, end, tot_time in stages %}
+        <tr>
+            <td> {{ stage.lap_type.name }} </td>
+
+            {% if team.disqualified %}
+            <td> D </td>
+            {% else %}
+            <td> {{ rank }} </td> 
+            {% endif %}
+
+            <td> {{ begin.time|time:"H:i:s" }} </td>
+            <td> {{ end.time|time:"H:i:s" }} </td>
+            <td> {{ tot_time }} </td>
+            <td>  </td>
+            <td>  </td>
+        </tr>
+        {% endfor %} {# stages #}
+    </tbody>
+    {% endfor %} {# teams #}
+
+{% ifchanged csc %}
+</table>
+</div>
+{% endifchanged %}
+
+{% endwith %} {# c #}
+{% endwith %} {# sc #}
+
+{% endwith %} {# nb_stages #}
+{% endfor %} {# categories #} 
+
+{% endblock %}
+
+
