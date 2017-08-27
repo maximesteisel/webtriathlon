@@ -7,8 +7,8 @@ function build  {
     echo "building $1.$2"
     cd src/$1
     #python -m compileall .
-    bzr revno > REVNO
-    zip -r  ../../build/$1.zip *  -x@../../.bzrignore
+    git rev-list --count HEAD > REVNO
+    zip -r  ../../build/$1.zip *  -x@../../.gitignore
     cd ../../build
     echo -e $HEADER| cat - $1.zip > $1.$2
     rm $1.zip
