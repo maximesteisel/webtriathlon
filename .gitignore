@@ -16,3 +16,4 @@ webtriathlon/server/wiki/fixtures/*.json
 twistd.pid
 src/encoder/REVNO
 src/server/REVNO
+*.pyc
