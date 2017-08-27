@@ -1,5 +1,7 @@
-2017-8-26
+2017
 
 * Passage à github.
 * Ajout d'un fichier NEWS.
-* Suppression des dependance vendorisées.
+* Suppression des dependances vendorisées.
+* Amélioration du mode double encodage, affichage des même données sur les deux écrans
+* Affichage uniquement des passages, pas des tours
