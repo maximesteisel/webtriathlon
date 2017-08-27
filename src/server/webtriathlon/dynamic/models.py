@@ -2,7 +2,7 @@
 from collections import defaultdict
 from threading import RLock, Lock
 from Queue import PriorityQueue, Empty
-from datetime import datetime
+from datetime import datetime, timedelta
 from contextlib import nested, contextmanager
 
 from django.db import models, IntegrityError, transaction, DatabaseError
@@ -499,6 +499,7 @@ class TeamStage(AutoRefreshModel):
     def affect(self):
         if self.team:
             return [
+                    self.team.state
                     ]
         return []
 
@@ -684,6 +685,7 @@ class State(AutoRefreshModel):
     ranking_fdelta = models.CharField(max_length=50)
     proj_time = models.FloatField(default=0)
     proj_ftime = models.CharField(max_length=50)
+    proj_next_passage = models.DateTimeField(default=None, null=True)
 
     has_error = models.NullBooleanField(null=True, default=None)
     error_msg = models.CharField(max_length=150, null=True)
@@ -743,6 +745,7 @@ class State(AutoRefreshModel):
             self.proj_ftime = format_time(self.proj_time)
         else:
             self.ranking_fdelta = "="
+            self.proj_time = self.total_time
             self.proj_ftime = self.total_ftime
         self.current_stage = find_current_stage(t)
         stage = self.current_stage
@@ -750,6 +753,7 @@ class State(AutoRefreshModel):
         if stage is None:
             self.passages_done = self.lap_done = 0
             self.passages_left = self.lap_left = 0
+            self.proj_next_passage = None
         else:
             self.passages_done = ps.filter(stage=stage, deleted=False).count()
             self.passages_left = max(0, stage.nb_passages-self.passages_done)
@@ -764,6 +768,13 @@ class State(AutoRefreshModel):
             self.current_lap_left = max(0, stage.nb_laps - self.current_lap)
             if stage.is_last and self.passages_left == 0:
                 self.have_finished=True
+
+            try:
+                expected_lap_time = self.last_passage.ends.time
+                self.proj_next_passage = self.last_passage.time + timedelta(seconds=expected_lap_time) 
+            except Lap.DoesNotExist:
+                pass
+
         errors = check_team(self.team, self.have_finished)
         self.has_error = bool(errors)
         if errors:

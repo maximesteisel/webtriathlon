@@ -281,10 +281,12 @@ class Team(models.Model):
     def expected(cls, station=None):
         teams = cls.objects.exclude(disqualified=True)
         teams = teams.exclude(real_state__have_finished=True)
+        teams = teams.exclude(real_state__proj_next_passage=None)
         if station:
             teams = teams.filter(
                     real_state__current_stage__main_station=station)
-        return teams.order_by("real_state__last_passage")
+        return teams.order_by("real_state__proj_next_passage")
+
 
     @property
     def have_finished(self):
