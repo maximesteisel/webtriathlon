@@ -96,8 +96,6 @@ class PassageHandler(ModelHandler):
 
     @classmethod
     def timestamp(self, p):
-        if p.duplicate:
-            p = p.duplicate
         return time.mktime(p.time.timetuple())
 
     @classmethod
