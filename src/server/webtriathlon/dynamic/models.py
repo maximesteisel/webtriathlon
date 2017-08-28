@@ -419,7 +419,7 @@ class Laps(DynamicModel):
         unique_together = ["team", "align"]
 
     def __unicode__(self):
-        return u"Tout les tours de %s (aligner: %s)"%(self.team, self.align)
+        return u"Tous les tours de %s (aligner: %s)"%(self.team, self.align)
 
     def affect(self):
         affected =  [
@@ -457,13 +457,12 @@ class Laps(DynamicModel):
                     if td.total_seconds() < MIN_DELTA:
                         p.duplicate = (last_p.duplicate or last_p) 
                         continue
+                new_stage = old_stage
                 if old_stage is None or nb_per_stage[old_stage] >= old_stage.nb_laps:
                     if old_stage==longuest_stage and extra_passages > 0:
                         extra_passages-=1
                     else:
                         new_stage = next_stage(self.team, old_stage)
-                else:
-                    new_stage = old_stage
                 if not p._checked:
                     if new_stage.main_station == p.station:
                         p.stage = new_stage

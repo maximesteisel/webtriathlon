@@ -331,12 +331,13 @@ class Passage(models.Model):
 
     def get_lap_before(self):
         if self.duplicate:
-            return self.duplicate.ends
+            self = self.duplicate
         return self.ends
 
     def get_lap_after(self):
         if self.duplicate:
-            return self.duplicate.begins
+            self = self.duplicate
+        return self.begins
 
     @property
     def nb(self):
@@ -384,7 +385,7 @@ class Passage(models.Model):
         if previous_p is not None:
             delta = self.time - previous_p.time
             if delta.total_seconds() < MIN_DELTA:
-                self.duplicate = last_p
+                self.duplicate = previous_p
                 self.save(raw=True)
                 return
 
