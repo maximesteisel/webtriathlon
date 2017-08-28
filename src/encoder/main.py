@@ -35,16 +35,24 @@ def gtk_update():
     while gtk.events_pending():
         gtk.main_iteration_do(False)
 
+FORMATS = [
+        "%H:%M",
+        "%H:%M:%S",
+        "%H%M",
+        "%H%M%S",
+        ]
+
 def parse_time(text):
     "Parse a text and return a timestamp"
-    try:
-        dtime = datetime.datetime.strptime(text, "%H:%M:%S").time()
-    except ValueError:
-        dtime = datetime.datetime.strptime(text, "%H:%M").time()
-    dtime = datetime.datetime.combine(datetime.date.today(), dtime)
-    timestamp = long(time.mktime(dtime.timetuple()))
-    return timestamp
-
+    for f in FORMATS:
+        try:
+            dtime = datetime.datetime.strptime(text, f).time()
+        except ValueError:
+            continue
+        dtime = datetime.datetime.combine(datetime.date.today(), dtime)
+        timestamp = long(time.mktime(dtime.timetuple()))
+        return timestamp
+    raise ValueError("Format invalide")
 
 class Main:
 ## Python special methods
@@ -458,9 +466,51 @@ class Main:
     def add_team(self):
         self.add_team_dialog.show()
 
+    def scroll_to_last(self, team_nb):
+        last_iter = None
+
+        iter = self.passages_list.get_iter_first()
+        while iter:
+            print iter
+            (team,) = self.passages_list.get(iter, self.columns["team"])
+            if str(team)==str(team_nb):
+                last_iter = iter
+            iter = self.passages_list.iter_next(iter)
+
+        if last_iter:
+            path = self.passages_list.get_string_from_iter(last_iter)
+            print path
+            self.passages_view.scroll_to_cell(path, use_align=True,
+                    row_align=0.5)
+            self.passages_view.set_cursor(path)
+
+    def get_timestamp(self):
+        but_past = self.builder.get_object("mode_past")
+        timestamp=None
+        if but_past.get_active():
+            dialog = gtk.Dialog("Entrez une heure", 
+                    None,
+                    gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                    (gtk.STOCK_OK, gtk.RESPONSE_OK)
+            )
+            dialog.set_default_response(gtk.RESPONSE_OK)
+            dialogBox = dialog.get_content_area()
+            e = gtk.Entry()
+            e.set_activates_default(True)
+            dialogBox.add(e)
+            dialog.show_all()
+            response = dialog.run()
+            text = e.get_text()
+            dialog.destroy()
+            text = text.replace(" ", ":")
+            timestamp = parse_time(text)
+        else:
+            timestamp=time.time()
+        return timestamp
+
     def add_passage(self, team, timestamp=None):
         if not timestamp:
-            timestamp=time.time()
+            timestamp = self.get_timestamp()
         station = self.settings["station_name"]
         iter = self.passages_list.append()
         localtime = time.localtime(timestamp)
@@ -561,16 +611,21 @@ class Main:
     def team_passage_clicked_cb(self, button):
         print "passage clicked"
         team = self.builder.get_object("team_spin")
-        team_nb = int(team.get_text())
-        iter = self.add_passage(team_nb)
-        path = self.passages_list.get_string_from_iter(iter)
-        self.passages_view.scroll_to_cell(path)
+        text = team.get_text()
+        if text.endswith("?"):
+            team_nb = int(text[:-1])
+            self.scroll_to_last(team_nb)
+        else:
+            team_nb = int(team.get_text())
+            iter = self.add_passage(team_nb)
+            path = self.passages_list.get_string_from_iter(iter)
+            self.passages_view.scroll_to_cell(path)
         team.set_text("")
         team.grab_focus()
 
     def team_spin_changed(self, entry):
         text = entry.get_text()
-        if(len(text)>2):
+        if(len(text)>3):
             gtk.gdk.beep()
 
     def path_passage_clicked_cb(self, button):

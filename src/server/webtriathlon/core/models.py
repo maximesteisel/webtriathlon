@@ -121,7 +121,7 @@ class Stage(models.Model):
 
     class Meta:
         verbose_name = u"Étape"
-        ordering = ["id"]
+        ordering = ["path", "id"]
 
     def __unicode__(self):
         return u"%s.%s"%(self.path.name, self.lap_type.name)
@@ -195,6 +195,7 @@ class Path(models.Model):
         verbose_name = "Parcours"
         verbose_name_plural = "Parcours"
         unique_together = ["name"]
+        ordering = ["name"]
 
     def __unicode__(self):
         return self.name

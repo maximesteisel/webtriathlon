@@ -116,8 +116,8 @@ class Client(object):
         last_u, last_t = self._get_last_timestamp(team)
         delta = timestamp - last_t
         duplicate_uuid = None
-        if delta < MIN_DELTA_PASS:
-            duplicate_uuid = last_u
+#        if delta < MIN_DELTA_PASS:
+#            duplicate_uuid = last_u
 
         def process_result(result, duplicate_uuid=duplicate_uuid):
             status, data = result
