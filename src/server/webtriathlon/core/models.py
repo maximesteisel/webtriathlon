@@ -45,6 +45,7 @@ class Person(models.Model):
 
 class Category(models.Model):
     name = models.CharField("Nom", max_length=40, unique=True)
+    correct_time = models.BooleanField("Corriger le temps")
 
     class Meta:
         verbose_name = u"Categorie"

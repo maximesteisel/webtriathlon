@@ -725,12 +725,18 @@ class State(AutoRefreshModel):
                 LOG.warning("bug in team.state: last_lap.passage is after last_passage")
                 self.last_passage = self.last_lap.passage
 
-        self.proj_time = projected_time_total(self.team)
+
         if self.first_passage:
             td = self.last_passage.time - self.first_passage.time
             self.total_time = timedelta_to_int(td)
         else:
             self.total_time = 0
+        
+        if t.category.correct_time:
+            self.proj_time = projected_time_total(self.team)
+        else :
+            self.proj_time = self.total_time
+
         self.total_ftime = format_time(self.total_time)
         self.ranking_delta = self.proj_time - self.total_time
 # With rounding error, we can have a team without correction,
