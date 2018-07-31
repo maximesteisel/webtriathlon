@@ -1,7 +1,8 @@
 # coding: utf-8
 import time
 import random
-from datetime import timedelta
+import csv
+from datetime import timedelta, datetime, date
 from heapq import nsmallest
 from zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED
 
@@ -193,6 +194,7 @@ def delete_all(request):
 
 class UploadPassagesForm(forms.Form):
     file  = forms.FileField(label="Fichier")
+
 class UploadSaveForm(forms.Form):
     file  = forms.FileField(label="Fichier")
     models = forms.MultipleChoiceField(
@@ -200,6 +202,117 @@ class UploadSaveForm(forms.Form):
             choices=[(m.__name__, m.__name__) for m in ALL_MODELS],
             widget=forms.SelectMultiple(attrs={"size":str(len(ALL_MODELS))}),
             )
+
+context = {"action": "/admin_tools/import_teams/", "title": "Importer des inscriptions"}
+@login_required
+@form_view(UploadPassagesForm, "save/upload.html", "/admin_tools/success/", context)
+def import_teams(request, form):
+        f = request.FILES["file"]
+        errors = do_import_teams(f)
+        async.refresh_all()
+
+
+        if errors:
+            return render_to_response('save/error.html',
+                    {"errors": errors})
+        else:
+            return render_to_response('admin_tools/jobs.html')
+
+def do_import_teams(f):
+    errors = []
+    with BATCH_MODE, CONN_LOCK, transaction.commit_on_success():
+        reader = csv.reader(f)
+        reader.next()
+        for row in reader:
+            try:
+                nb, cat, subcats, parcours, membres = row
+
+                c = Category.objects.get(
+                    name = cat
+                )
+
+                parcours = Path.objects.get(
+                     name = parcours.decode("CP1252")
+                )
+                team = Team.objects.create(
+                        nb = int(nb),
+                        category = c,
+                        path = parcours
+                )
+ 
+                for s in subcats.split(";"):
+                    s = s.strip().decode("CP1252")
+                    s, created = SubCategory.objects.get_or_create(
+                        name = s
+                    )
+                    team.subcategories.add(s)
+
+                for p in membres.split(";"):
+                    p = p.strip().decode("CP1252")
+                    firstname, lastname = p.split(" ", 1)
+                    p, created = Person.objects.get_or_create(
+                            first_name = firstname,
+                            last_name = lastname)
+                    team.members.add(p)
+                team.save() 
+
+            except Exception, e:
+                import traceback
+                traceback.print_exc()
+                errors.append("%s: %s"%(nb, e))
+
+    return errors
+    
+    
+context = {"action": "/admin_tools/import_passages/", "title": "Importer des pointages"}
+@form_view(UploadPassagesForm, "save/upload.html", "/admin_tools/success/", context)
+def import_passages(request, form):
+        f = request.FILES["file"]
+        errors = do_import_passages(f)
+        async.refresh_all()
+
+
+        if errors:
+            return render_to_response('save/error.html',
+                    {"errors": errors})
+        else:
+            return render_to_response('admin_tools/jobs.html')
+
+def do_import_passages(f):
+    errors = []
+    with BATCH_MODE, CONN_LOCK, transaction.commit_on_success():
+        reader = csv.reader(f)
+        reader.next()
+        today = date.today()
+        for row in reader:
+            try:
+                nb, poste, temps = row
+
+                team = Team.objects.get(
+                    nb = nb
+                )
+
+                poste = Station.objects.get(
+                     name = poste.decode("CP1252")
+                )
+                
+                t = datetime.strptime(temps, "%H:%M:%S").time()
+                
+                dt = datetime.combine(today, t)
+                
+                p = Passage.objects.create(
+                        team = team,
+                        station=poste,
+                        time=dt
+                )
+ 
+
+            except Exception, e:
+                import traceback
+                traceback.print_exc()
+                errors.append("%s: %s"%(nb, e))
+
+    return errors
 
 context = {"action": "/admin_tools/open/", "title": "Charger une sauvegarde", "dbversion": DBVERSION}
 @login_required
