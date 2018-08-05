@@ -218,21 +218,32 @@ def import_teams(request, form):
         else:
             return render_to_response('admin_tools/jobs.html')
 
+def guess_encoding(headers):
+	encoding = "CP1252"
+	for h in headers:
+		if u"Ã©" in h.decode("CP1252"):
+			encoding = "UTF-8"
+			break
+	return encoding
+	
 def do_import_teams(f):
     errors = []
     with BATCH_MODE, CONN_LOCK, transaction.commit_on_success():
+        Team.objects.all().delete()
+        Person.objects.all().delete()
         reader = csv.reader(f)
-        reader.next()
+        headers = reader.next()
+        encoding = guess_encoding(headers)
         for row in reader:
             try:
-                nb, cat, subcats, parcours, membres = row
+                nb, cat, subcats, parcours, pmb1, nmb1, emb1, pmb2, nmb2, pmb3, nmb3 = row
 
                 c = Category.objects.get(
                     name = cat
                 )
 
                 parcours = Path.objects.get(
-                     name = parcours.decode("CP1252")
+                     name = parcours.decode(encoding)
                 )
                 team = Team.objects.create(
                         nb = int(nb),
@@ -241,19 +252,21 @@ def do_import_teams(f):
                 )
  
                 for s in subcats.split(";"):
-                    s = s.strip().decode("CP1252")
+                    s = s.strip().decode(encoding)
                     s, created = SubCategory.objects.get_or_create(
                         name = s
                     )
                     team.subcategories.add(s)
 
-                for p in membres.split(";"):
-                    p = p.strip().decode("CP1252")
-                    firstname, lastname = p.split(" ", 1)
+                for firstname, lastname in [(pmb1, nmb1), (pmb2, nmb2), (pmb3, nmb3)]:
+                    if firstname == "0":
+                        continue
                     p, created = Person.objects.get_or_create(
-                            first_name = firstname,
-                            last_name = lastname)
+                            first_name = firstname.decode(encoding),
+                            last_name = lastname.decode(encoding)
+                    )
                     team.members.add(p)
+
                 team.save() 
 
             except Exception, e:
