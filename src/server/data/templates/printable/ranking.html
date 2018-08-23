@@ -28,8 +28,10 @@
             <th> Départ </th>
             <th> Arrivée </th>
             <th> Temps total </th>
+            {% if c.correct_time %}
             <th> Correction </th>
             <th> Temps corrigé </th>
+            {% endif %}
         </tr>
     </thead>
 {% endifchanged %}
@@ -62,8 +64,10 @@
             <td> {{ team.state.first_passage.time|time:"H:i:s" }} </td>
             <td> {{ team.state.last_passage.time|time:"H:i:s" }} </td>
             <td> <b> {{ team.state.total_ftime }} </b> </td>
+            {% if c.correct_time %}
             <td> {{ team.state.ranking_fdelta }} </td>  
             <td> {{ team.state.proj_ftime }} </td>
+            {% endif %}
         </tr>
 
         {% for rank, stage, laps, begin, end, tot_time in stages %}
@@ -79,8 +83,10 @@
             <td> {{ begin.time|time:"H:i:s" }} </td>
             <td> {{ end.time|time:"H:i:s" }} </td>
             <td> {{ tot_time }} </td>
+            {% if c.correct_time %}
             <td>  </td>
             <td>  </td>
+            {% endif %}
         </tr>
         {% endfor %} {# stages #}
     </tbody>
