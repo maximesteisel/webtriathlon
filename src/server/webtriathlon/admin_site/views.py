@@ -231,9 +231,12 @@ def do_import_teams(f):
     with BATCH_MODE, CONN_LOCK, transaction.commit_on_success():
         Team.objects.all().delete()
         Person.objects.all().delete()
-        reader = csv.reader(f)
+        dialect = csv.Sniffer().sniff(f.read(1024))
+        f.seek(0)
+        reader = csv.reader(f, dialect)
         headers = reader.next()
         encoding = guess_encoding(headers)
+        nb = ""
         for row in reader:
             try:
                 nb, cat, subcats, parcours, pmb1, nmb1, emb1, pmb2, nmb2, pmb3, nmb3 = row
