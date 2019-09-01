@@ -147,7 +147,7 @@ class Stage(models.Model):
         stage so corresponding to
         Passage.objects.fiter(station=main_station).count() in a normal
         situation"""
-        return self.nb_laps + bool(self.before)
+        return self.nb_laps + bool(self.before) + bool(self.after and self.after.station == self.main_station)
 
     @property
     def length(self):

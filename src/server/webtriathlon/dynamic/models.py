@@ -359,6 +359,8 @@ class Lap(DynamicModel):
         return bool(self.stage.before and self.begin.station == self.stage.before.station)
 
     def get_jonction_after(self):
+        if self.stage.after and self.stage.after.station == self.stage.main_station:
+            return self.nb == self.stage.nb_laps + 1
         return bool(self.stage.after and self.end.station == self.stage.after.station)
 
     @property
