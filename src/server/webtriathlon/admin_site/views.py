@@ -297,10 +297,15 @@ def import_passages(request, form):
 def do_import_passages(f):
     errors = []
     with BATCH_MODE, CONN_LOCK, transaction.commit_on_success():
-        reader = csv.reader(f)
+        dialect = csv.Sniffer().sniff(f.read(1024))
+        f.seek(0)
+        reader = csv.reader(f, dialect)
         reader.next()
         today = date.today()
+        nb = None
         for row in reader:
+            if not row:
+                continue
             try:
                 nb, poste, temps = row
 
@@ -326,7 +331,7 @@ def do_import_passages(f):
             except Exception, e:
                 import traceback
                 traceback.print_exc()
-                errors.append("%s: %s"%(nb, e))
+                errors.append("%s: %s"%(row, e))
 
     return errors
 
