@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HEADER="#!/usr/bin/python\n"
+HEADER="#!/usr/bin/env python2\n"
 
 mkdir -p build
 function build  {

@@ -49,7 +49,7 @@ ADMINS = (
 AUTH_PROFILE_MODULE = 'webtriathlon.addressbook.Person'
 
 MANAGERS = ADMINS
-DATABASE_PATH = expanduser("~") 
+DATABASE_PATH = abspath(join(dirname(__file__), '..','..'))
 DATABASES = {
         "default": {
             "ENGINE":'django.db.backends.sqlite3',
